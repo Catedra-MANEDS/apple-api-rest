@@ -1,0 +1,13 @@
+DELETE FROM apilog;
+DELETE FROM authentication;
+DELETE FROM devices;
+DELETE FROM passes;
+DELETE FROM registrations;
+DELETE FROM registrations_prueba;
+
+ALTER SEQUENCE apilog_pkid_seq RESTART WITH 1;
+ALTER SEQUENCE authentication_authid_seq RESTART WITH 1;
+ALTER SEQUENCE devices_pkid_seq RESTART WITH 1;
+ALTER SEQUENCE passes_pkid_seq RESTART WITH 1;
+ALTER SEQUENCE registrations_pkid_seq RESTART WITH 1;
+ALTER SEQUENCE registrations_prueba_pkid_seq RESTART WITH 1;
