@@ -11,3 +11,10 @@ ALTER SEQUENCE devices_pkid_seq RESTART WITH 1;
 ALTER SEQUENCE passes_pkid_seq RESTART WITH 1;
 ALTER SEQUENCE registrations_pkid_seq RESTART WITH 1;
 ALTER SEQUENCE registrations_prueba_pkid_seq RESTART WITH 1;
+
+DROP TABLE apilog;
+DROP TABLE authentication;
+DROP TABLE devices;
+DROP TABLE passes;
+DROP TABLE registrations;
+DROP TABLE registrations_prueba;

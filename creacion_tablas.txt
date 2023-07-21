@@ -1,0 +1,40 @@
+CREATE TABLE devices (
+  deviceLibraryIdentifier varchar(100) NOT NULL UNIQUE,
+  pushToken varchar(100),
+  updateTimestamp timestamp
+);
+
+CREATE TABLE passes (
+  pkid serial PRIMARY KEY,
+  passTypeIdentifier varchar(100),
+  serialNumber varchar(100),
+  pkpass_name varchar(150),
+  pkpass_route varchar(200),
+  updateTimestamp timestamp,
+  passDataJson text,
+  CONSTRAINT unique_passes UNIQUE (passTypeIdentifier, serialNumber)
+);
+
+CREATE TABLE registrations (
+  pkid serial PRIMARY KEY,
+  deviceLibraryIdentifier varchar(100),
+  passTypeIdentifier varchar(100),
+  serialNumber varchar(100),
+  updateTimestamp timestamp
+);
+
+CREATE TABLE apilog (
+  pkid serial PRIMARY KEY,
+  APILog varchar(5000),
+  timestamp timestamp
+);
+
+CREATE TABLE authentication (
+  authid serial PRIMARY KEY,
+  authenticationtoken varchar(100),
+  pkpass_name varchar(100)
+);
+
+
+ALTER TABLE passes
+ADD CONSTRAINT uq_ApplePasses UNIQUE(passTypeIdentifier, serialNumber);

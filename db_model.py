@@ -22,6 +22,8 @@ class Passes(db.Model):
     pkid = db.Column(db.Integer, primary_key=True)
     passtypeidentifier = db.Column(db.String(100))
     serialnumber = db.Column(db.String(100))
+    pkpass_name = db.Column(db.String(150))
+    pkpass_route = db.Column(db.String(200))
     updatetimestamp=db.Column(db.TIMESTAMP(timezone=False))
     passdatajson=db.Column(db.Text)
 
@@ -60,8 +62,23 @@ class Authentication(db.Model):
     __tablename__ = 'authentication'
     authid = db.Column(db.Integer, primary_key=True)
     authenticationtoken = db.Column(db.String(100))
+    pkpass_name= db.Column(db.String(100))
 
     def save(self):
         if not self.id:
             db.session.add(self)
         db.session.commit()
+
+# Definimos el modelo para la tabla de la base de datos
+class Cliente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(80))
+    edad = db.Column(db.Integer)
+    correo = db.Column(db.String(120))
+    fecha_fin_contrato = db.Column(db.Date)
+
+    def __init__(self, nombre, edad, correo, fecha_fin_contrato):
+        self.nombre = nombre
+        self.edad = edad
+        self.correo = correo
+        self.fecha_fin_contrato = fecha_fin_contrato
