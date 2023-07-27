@@ -1,0 +1,41 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Campaña</title>
+    <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Insertar Datos en la Tabla Campaigns</h2>
+        <form action="/insertar_campaigns" method="POST">
+            <!-- Agregar campos del formulario específicos para Campaigns -->
+            <div class="form-group">
+                <label for="campaign_title">Título de Campaña:</label>
+                <input type="text" class="form-control" id="campaign_title" name="campaign_title" required>
+            </div>
+            <div class="form-group">
+                <label for="begin_date">Fecha de Inicio:</label>
+                <input type="date" class="form-control" id="begin_date" name="begin_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Fecha de Fin:</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" required>
+            </div>
+            <div class="form-group">
+                <label for="status">Estado (Activa/Inactiva):</label>
+                <select class="form-control" id="status" name="status" required>
+                    <option value="True">Activa</option>
+                    <option value="False">Inactiva</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Datos</button>
+        </form>
+    </div>
+</body>
+</html>

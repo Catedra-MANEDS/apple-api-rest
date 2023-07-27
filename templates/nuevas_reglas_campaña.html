@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nuevas Reglas de Campaña</title>
+    <!-- Agregar los enlaces a los archivos de Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Nuevas Reglas de Campaña para la campaña {{ campaign.campaign_id }}</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="age_start">Edad mínima:</label>
+                <input type="number" class="form-control" id="age_start" name="age_start" required>
+            </div>
+            <div class="form-group">
+                <label for="age_end">Edad máxima:</label>
+                <input type="number" class="form-control" id="age_end" name="age_end" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">Género:</label>
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Mixto">Mixto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="begin_date">Fecha de inicio:</label>
+                <input type="date" class="form-control" id="begin_date" name="begin_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Fecha de fin:</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Reglas</button>
+        </form>
+    </div>
+</body>
+</html>

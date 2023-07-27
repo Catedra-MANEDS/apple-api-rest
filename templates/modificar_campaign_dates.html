@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modificar Campaña - Fechas</title>
+    <!-- Enlace a los estilos de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Modificar Campaña - Fechas</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="begin_date">Fecha de Inicio:</label>
+                <input type="date" class="form-control" name="begin_date" value="{{ campaign.begin_date }}">
+            </div>
+            <div class="form-group">
+                <label for="end_date">Fecha de Fin:</label>
+                <input type="date" class="form-control" name="end_date" value="{{ campaign.end_date }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</body>
+</html>
+

@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Centrado con Bootstrap</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos almacenados</title>
+    <!-- Agrega el enlace al archivo CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="container d-flex align-items-center justify-content-center" style="height: 100vh;">
-    <div class="text-center">
-      <h1 class="display-4">Datos almacenados correctamente</h1>
+<body class="body-datos-almacenados">
+    <div class="background-image"></div>
+    <div class="contenedor-datos-almacenados">
+        <h1 class="display-4">Datos almacenados correctamente</h1>
     </div>
-  </div>
 </body>
 </html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mostrar Campañas</title>
+    <!-- Enlace a los estilos de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Campañas</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campaign in campañas %}
+                <tr>
+                    <td>{{ campaign.campaign_id }}</td>
+                    <td>{{ campaign.campaign_title }}</td>
+                    <td>{{ campaign.begin_date }}</td>
+                    <td>{{ campaign.end_date }}</td>
+                    <td>{{ "Activa" if campaign.status else "Inactiva" }}</td>
+                    <td>
+                        <form method="post" action="/modificar_campaña/{{ campaign.campaign_id }}">
+                            <input type="hidden" name="opcion" value="1">
+                            <button type="submit" class="btn btn-primary">Modificar fechas de campaña</button>
+                        </form>
+                        <form method="post" action="/modificar_campaña/{{ campaign.campaign_id }}">
+                            <input type="hidden" name="opcion" value="2">
+                            <button type="submit" class="btn btn-info">Modificar Reglas de segmentacion</button>
+                        </form>
+                        <form method="post" action="/modificar_campaña/{{ campaign.campaign_id }}">
+                            <input type="hidden" name="opcion" value="3">
+                            <button type="submit" class="btn btn-warning">Modificar Mensaje de notificacion</button>
+                        </form>
+                        <form method="post" action="/eliminar_campaña/{{ campaign.campaign_id }}">
+                            <button type="submit" class="btn btn-danger">Eliminar campaña</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

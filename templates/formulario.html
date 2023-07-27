@@ -1,35 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Formulario con Flask y Bootstrap</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Cliente</title>
     <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    <div class="container mt-5">
-        <form method="POST" action="/procesar">
-            <div class="form-group">
-                <label for="nombre">Nombre:</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" required>
-            </div>
-            <div class="form-group">
-                <label for="edad">Edad:</label>
-                <input type="number" class="form-control" id="edad" name="edad" required>
-            </div>
-            <div class="form-group">
-                <label for="correo">Correo electrónico:</label>
-                <input type="email" class="form-control" id="correo" name="correo" required>
-            </div>
-            <div class="form-group">
-                <label for="fecha_fin_contrato">Fecha de fin de contrato:</label>
-                <input type="date" class="form-control" id="fecha_fin_contrato" name="fecha_fin_contrato" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Enviar</button>
-        </form>
+<body class="body-formulario">
+    <div class="background-image"></div>
+    <div class="contenedor-formulario">
+        <!-- Título del formulario -->
+                <h2 class="mb-4 text-center">Registro nuevo cliente</h2>
+                <!-- Formulario -->
+                <form method="POST" action="/nuevo_cliente">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edad">Edad:</label>
+                        <input type="number" class="form-control" id="edad" name="edad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="correo">Correo electrónico:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                    </div>
+                    <!-- Campo Fecha de inicio de contrato -->
+                    <div class="form-group">
+                        <label for="fecha_inicio_contrato">Fecha de inicio de contrato (mm/dd/yyyy):</label>
+                        <!-- Establecer una fecha por defecto (puedes cambiarla a la que desees) -->
+                        <input type="date" class="form-control" id="fecha_inicio_contrato" name="fecha_inicio_contrato" value="2023-07-28" required>
+                    </div>  
+                    <div class="form-group">
+                        <label for="fecha_fin_contrato">Fecha de fin de contrato (mm/dd/yyyy):</label>
+                        <input type="date" class="form-control" id="fecha_fin_contrato" name="fecha_fin_contrato" value="2023-11-28" required>
+                    </div>
+    
+                    <!-- Campo Mes de registro -->
+                    <!--
+                    <div class="form-group">
+                        <label for="mes_registro">Mes de registro:</label>
+                        <select class="form-control" id="mes_registro" name="mes_registro">
+                            <option value="" disabled selected>Selecciona un mes</option>
+                            <option value="enero">Enero</option>
+                            <option value="febrero">Febrero</option>
+                            <option value="marzo">Marzo</option>
+                            <option value="abril">Abril</option>
+                            <option value="mayo">Mayo</option>
+                            <option value="junio">Junio</option>
+                            <option value="julio">Julio</option>
+                            <option value="agosto">Agosto</option>
+                            <option value="septiembre">Septiembre</option>
+                            <option value="octubre">Octubre</option>
+                            <option value="noviembre">Noviembre</option>
+                            <option value="diciembre">Diciembre</option>
+                        </select>
+                    </div>
+                     -->
+                    <!-- Campo Género -->
+                    <div class="form-group">
+                        <label for="genero">Género:</label>
+                        <select class="form-control" id="genero" name="genero" required>
+                            <option value="masculino">Masculino</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
     </div>
-    <!-- Agrega los enlaces a los archivos JavaScript de Bootstrap (jQuery primero, luego Popper.js y finalmente Bootstrap.js) -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </body>
 </html>

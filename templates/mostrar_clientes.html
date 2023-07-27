@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mostrar Clientes</title>
+    <!-- Enlace a los estilos de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Mostrar Clientes</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Correo</th>
+                    <th>Fecha de Inicio de Contrato</th>
+                    <th>Fecha de Fin de Contrato</th>
+                    <th>Género</th>
+                    <th>Ruta de Directorio Pass</th>
+                    <th>Campaña Asociada</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.edad }}</td>
+                    <td>{{ cliente.correo }}</td>
+                    <td>{{ cliente.fecha_inicio_contrato }}</td>
+                    <td>{{ cliente.fecha_fin_contrato }}</td>
+                    <td>{{ cliente.genero }}</td>
+                    <td>{{ cliente.ruta_directorio_pass }}</td>
+                    <td>{{ cliente.campaign.campaign_title }}</td>
+                    <td>
+                        <form method="post" action="/modificar_cliente">
+                            <input type="hidden" name="cliente_id" value="{{ cliente.id }}">
+                            <button type="submit" class="btn btn-primary">Modificar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

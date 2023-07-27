@@ -35,6 +35,114 @@ CREATE TABLE authentication (
   pkpass_name varchar(100)
 );
 
+CREATE TABLE clientes (
+    id serial PRIMARY KEY,
+    nombre character varying(80),
+    edad integer,
+    correo character varying(120),
+    fecha_fin_contrato date,
+    fecha_inicio_contrato date,
+    genero character varying(15),
+    ruta_directorio_pass varchar(200),
+    campaign_id integer REFERENCES Campaigns(campaign_id)
+);
 
 ALTER TABLE passes
 ADD CONSTRAINT uq_ApplePasses UNIQUE(passTypeIdentifier, serialNumber);
+
+
+-------------------------------TABLA CLIENTES------------------------
+CREATE TABLE clientes (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(80),
+    edad INTEGER,
+    correo VARCHAR(120),
+    fecha_fin_contrato DATE,
+    fecha_inicio_contrato DATE,
+    genero VARCHAR(15),
+    ruta_directorio_pass VARCHAR(200),
+    campaign_id INTEGER,
+    FOREIGN KEY (campaign_id) REFERENCES campaigns (campaign_id)
+);
+
+------------------------CREAR TABLAS DE CAMPAÑAS DE NOTIFICACIONES---------------------
+
+Cada tabla tiene sus columnas definidas según los campos que mencionaste, y las relaciones entre las tablas se 
+establecen mediante claves foráneas. 
+La tabla "Campaigns" es la tabla principal que contiene información general de cada campaña. 
+Las otras tablas ("Campaign_notifications", "Campaign_rules" y "CampaignsSubscriptions") están relacionadas con 
+la tabla "Campaigns" mediante la columna "campaign_id".
+
+
+CREATE TABLE campaigns (
+    campaign_id SERIAL PRIMARY KEY,
+    campaign_title VARCHAR(100) NOT NULL,
+    begin_date DATE,
+    end_date DATE,
+    status BOOLEAN
+);
+
+CREATE TABLE campaign_notifications (
+    campaign_id INTEGER,
+    message VARCHAR(255) NOT NULL,
+    pass_field_to_update VARCHAR(150),
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id)
+);
+
+CREATE TABLE campaign_rules (
+    campaign_id INTEGER,
+    age_start INTEGER,
+    age_end INTEGER,
+    gender VARCHAR(15),
+    begin_date DATE,
+    end_date DATE,
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id)
+);
+
+CREATE TABLE campaigns_subscriptions (
+    campaign_id INTEGER,
+    serialnumber VARCHAR(100),
+    passTypeIdentifier VARCHAR(100),
+    pushToken varchar(150),
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id)
+);
+
+
+METER DATOS EN LA TABLA CAMPAÑAS
+
+  INSERT INTO campaigns (campaign_title, begin_date, end_date, status)
+  VALUES ('verano_joven', '2023-06-01', '2023-09-30', TRUE);
+
+  INSERT INTO campaigns (campaign_title, begin_date, end_date, status)
+  VALUES ('verano_adulto', '2023-06-01', '2023-09-30', TRUE);
+
+  INSERT INTO campaigns (campaign_title, begin_date, end_date, status)
+  VALUES ('navidad', '2023-11-01', '2023-01-07', TRUE);
+
+  INSERT INTO campaigns (campaign_title, begin_date, end_date, status)
+  VALUES ('invierno', '2023-01-07', '2023-03-31', TRUE);
+
+  CAMPAÑA DE RETENCION 
+
+    INSERT INTO campaigns (campaign_title, begin_date, end_date, status)
+    VALUES ('retencion', '2023-06-01', '2023-09-30', TRUE);
+
+METER REGLAS DE CAMPAÑA EN LA TABLA REGLAS DE CAMPAÑAS
+  INSERT INTO campaign_rules (campaign_id, age_start, age_end, gender, begin_date, end_date)
+  VALUES (1, 18, 30, 'masculino', '2023-06-01', '2023-09-30');
+
+METER DATOS EN LA TABLA DE NOTIFICACIONES DE CAMPAÑA
+
+    \u00a1Este verano GB acumulables, para que viajes sin limites!
+
+  INSERT INTO campaign_notifications (campaign_id, message, pass_field_to_update)
+  VALUES (1, 'Este verano, gigas extras, ''\u00a1gratis!''', '["auxiliaryFields"][0]["value"]');
+
+  INSERT INTO campaign_notifications (campaign_id, message, pass_field_to_update)
+  VALUES (2, '''\u00a1''Comparte Gbs estas vacaciones con tu familia!', '["auxiliaryFields"][0]["value"]');
+
+  INSERT INTO campaign_notifications (campaign_id, message, pass_field_to_update)
+  VALUES (3, '''\u00a1''Esta navidad, regala gigas!!!', '["auxiliaryFields"][0]["value"]');
+
+  INSERT INTO campaign_notifications (campaign_id, message, pass_field_to_update)
+  VALUES (4, '''\u00a1''Este invierno te vas a quedar helado con nuestros precios!', '["auxiliaryFields"][0]["value"]');

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modificar Campaña - Reglas</title>
+    <!-- Enlace a los estilos de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Modificar Campaña - Reglas</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="age_start">Edad Inicial:</label>
+                <input type="number" class="form-control" name="age_start" value="{{ campaign.campaign_rules.age_start }}">
+            </div>
+            <div class="form-group">
+                <label for="age_end">Edad Final:</label>
+                <input type="number" class="form-control" name="age_end" value="{{ campaign.campaign_rules.age_end }}">
+            </div>
+            <div class="form-group">
+                <label for="gender">Género:</label>
+                <input type="text" class="form-control" name="gender" value="{{ campaign.campaign_rules.gender }}">
+            </div>
+            <div class="form-group">
+                <label for="begin_date">Fecha de Inicio:</label>
+                <input type="date" class="form-control" name="begin_date" value="{{ campaign.campaign_rules.begin_date }}">
+            </div>
+            <div class="form-group">
+                <label for="end_date">Fecha de Fin:</label>
+                <input type="date" class="form-control" name="end_date" value="{{ campaign.campaign_rules.end_date }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</body>
+</html>
+
