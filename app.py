@@ -45,6 +45,7 @@ pass_generator_directory = os.path.join(app_directory, "..", "pass_generator")
 # Ruta completa al script auto_new_pass_generator.py
 path_auto_new_pass_generator = os.path.join(pass_generator_directory, "auto_new_pass_generator.py")
 path_auto_new_pass_regenerator=os.path.join(pass_generator_directory, "auto_pass_regenerator.py")
+path_auto_new_pass_fields_regenerator=os.path.join(pass_generator_directory, "auto_new_pass_fields_regenerator.py")
 
 
 def new_request_print():
@@ -117,6 +118,7 @@ def nuevo_cliente():
 
     return render_template('datos_almacenados.html')
 
+"""----------------------------------ENDPOINTS de CAMPAÑAS----------------------------------------"""
 # Ruta para mostrar las campañas y seleccionar una para modificar
 @app.route('/mostrar_campaña', methods=['GET', 'POST'])
 def mostrar_campaña():
@@ -240,6 +242,30 @@ def mostrar_clientes():
     # Obtener todos los datos de la tabla Clientes
     clientes = Clientes.query.all()
     return render_template('mostrar_clientes.html', clientes=clientes)
+
+@app.route('/modificar_pase/<int:cliente_id>', methods=['GET', 'POST'])
+def modificar_pase(cliente_id):
+    cliente = Clientes.query.get(cliente_id)
+    if request.method == 'POST':
+        cliente_id = request.form['cliente_id']
+        ruta_al_pase= cliente.ruta_directorio_pass
+        gigas = request.form['gigas']
+        facturacion = request.form['facturacion']
+        mes = request.form['mes']
+
+        #Llamamos al script que actualiza el pase
+        result = subprocess.run(['python3', path_auto_new_pass_fields_regenerator, cliente.nombre, str(cliente.campaign_id),gigas, facturacion, mes, ruta_al_pase])
+
+        # Si es 0 el proceso se completó con exito, se creo el nuevo pase del cliente 
+        if result.returncode == 0:
+            print("\nPase actualizado con exito, REFRESQUE EL PASE!!!\n")
+        else:
+            print("\nError al actualizar el pase!\n")
+
+        # Redirigir a la página de mostrar campañas
+        return redirect('/mostrar_clientes')
+    
+    return render_template('modifcar_pase_del_cliente.html',cliente=cliente)
 
 @app.route('/nueva_campaña', methods=['GET', 'POST'])
 def nueva_campaña():
@@ -493,18 +519,9 @@ def register_device(deviceLibraryIdentifier, passTypeIdentifier, serialNumber):
         return Response(status=201, mimetype='application/json')
 
     elif request.method == 'DELETE':
+        #Eliminamos el pase de las tablas de registro para los servidores de Apple
         filas_register = Registrations.query.filter_by(devicelibraryidentifier=deviceLibraryIdentifier, passtypeidentifier=passTypeIdentifier,serialnumber=serialNumber).all()
-        # if filas_register:
-        #     for fila in filas_register:
-        #         #print(fila) --> solo muestra el nº de fila donde se encuentra, pero no los valores como tal
-        #         #Eso ya se comprueba en la propia query
-        #         #print(fila[0]) NO FUNCIONA 
-        #         db.session.delete(fila)
         filas_devices = Devices.query.filter_by(devicelibraryidentifier=deviceLibraryIdentifier).all()
-        # if filas_devices:
-        #     for fila in filas_devices:
-        #         db.session.delete(fila)
-        # db.session.commit()
         if filas_devices and filas_register:
             try:
                 for fila in filas_register:
@@ -519,6 +536,25 @@ def register_device(deviceLibraryIdentifier, passTypeIdentifier, serialNumber):
                 print("Error:", str(exception))
         else:
             print("No data to delete.\n")
+
+        #Eliminamos los registros del cliente y de su pase de las tablas de gestion clientes y pases
+        try:
+            #Obtenemos la ruta al pkpass actualizado para el passID y serialNumber recibidos 
+            pass_to_delete = Passes.query.filter_by(serialnumber=serialNumber, passtypeidentifier=passTypeIdentifier).one()
+            if not pass_to_delete:
+                raise FileNotFoundError("El archivo no existe.")
+            nombre_cliente = os.path.splitext(pass_to_delete.pkpass_name)[0]
+            cliente_to_delete = Clientes.query.filter_by(nombre=nombre_cliente).one()
+            try:
+                db.session.delete(pass_to_delete)
+                db.session.delete(cliente_to_delete)
+                db.session.commit()
+            except Exception as exception:
+                db.session.rollback()  # Revierte la transacción en caso de error
+                print("Error:", str(exception))
+        except ValueError as e:
+            print(f"Error: no se encontró el dato en la base de datos. \nDetalles del error: {e}")
+
         end_request_print()
         return Response(status=200, mimetype='application/json')
 

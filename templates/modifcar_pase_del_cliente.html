@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modificar Pase</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Modificar Campos del Pase del Cliente</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="gigas">Gigas:</label>
+                <input type="text" class="form-control" name="gigas" placeholder="Nuevo valor de gigas">
+            </div>
+
+            <div class="form-group">
+                <label for="facturacion">Facturación:</label>
+                <input type="text" class="form-control" name="facturacion" placeholder="Nuevo valor de facturación">
+            </div>
+
+            <div class="form-group">
+                <label for="mes">Mes:</label>
+                <input type="text" class="form-control" name="mes" placeholder="Nuevo valor de mes">
+            </div>
+
+            <input type="hidden" name="cliente_id" value="{{ cliente_id }}">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+    </div>
+</body>
+</html>

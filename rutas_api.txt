@@ -1,0 +1,13 @@
+
+
+MODIFICAR TABLAS DE CAMPAÑAS
+	https://pepephone.jumpingcrab.com:5000/insertar_datos_campañas
+
+MOSTRAR CLIENTES Y A QUE CAMPAÑAS ESTAN SUSCRITOS
+	https://pepephone.jumpingcrab.com:5000/mostrar_clientes
+
+MOSTRAR LAS CAMPAÑAS EXISTENTES
+	https://pepephone.jumpingcrab.com:5000/mostrar_campaña
+	
+CREAR UNA NUEVA CAMPAÑA
+	https://pepephone.jumpingcrab.com:5000/nueva_campaña

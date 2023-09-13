@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insertar Datos en Campañas</title>
+    <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Insertar datos en una de las tablas de campañas</h2>
+        <form action="/insertar_datos_campañas" method="POST">
+            <div class="form-group">
+                <label for="tabla_seleccionada">Seleccione una tabla para insertar datos:</label>
+                <select class="form-control" id="tabla_seleccionada" name="tabla_seleccionada">
+                    <option value="campaigns">Campaigns</option>
+                    <option value="campaign_notifications">Campaign_notifications</option>
+                    <option value="campaign_rules">Campaign_rules</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Continuar</button>
+        </form>
+    </div>
+</body>
+</html>

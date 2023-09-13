@@ -33,18 +33,29 @@
                     <td>{{ cliente.fecha_inicio_contrato }}</td>
                     <td>{{ cliente.fecha_fin_contrato }}</td>
                     <td>{{ cliente.genero }}</td>
-                    <td>{{ cliente.ruta_directorio_pass }}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">{{ cliente.ruta_directorio_pass }}</td>
                     <td>{{ cliente.campaign.campaign_title }}</td>
+                <!--
                     <td>
-                        <form method="post" action="/modificar_cliente">
+                        <form method="post" action="/modificar_suscripcion">
                             <input type="hidden" name="cliente_id" value="{{ cliente.id }}">
-                            <button type="submit" class="btn btn-primary">Modificar</button>
+                            <button type="submit" class="btn btn-primary">Modificar Suscripcion</button>
                         </form>
                     </td>
+                -->
+                    <td>
+                        <form method="get" action="/modificar_pase/{{ cliente.id }}">
+                            <input type="hidden" name="cliente_id" value="{{ cliente.id }}">
+                            <button type="submit" class="btn btn-primary">Modificar Pase</button>
+                        </form>
+		            </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <form method="get" action="/mostrar_campaña">
+            <button type="submit" class="btn btn-secondary">Volver al Menú de Gestión de Campañas</button>
+        </form>
     </div>
 </body>
 </html>
