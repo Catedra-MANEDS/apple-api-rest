@@ -95,8 +95,8 @@ class Campaigns(db.Model):
     end_date = db.Column(db.Date)
     status = db.Column(db.Boolean)
 
-    campaign_notifications = db.relationship('Campaign_notifications', back_populates='campaign')
-    campaign_rules = db.relationship('Campaign_rules', back_populates='campaign')
+    campaign_notifications = db.relationship('Campaign_notifications', back_populates='campaign', cascade="all, delete-orphan")
+    campaign_rules = db.relationship('Campaign_rules', back_populates='campaign', cascade="all, delete-orphan")
     #campaign_subscriptions = db.relationship('Campaigns_subscriptions', back_populates='campaign')
 
 

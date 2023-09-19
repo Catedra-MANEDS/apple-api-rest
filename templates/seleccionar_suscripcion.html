@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seleccionar Campaña</title>
+    <!-- Enlace a los estilos de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Seleccionar Campaña para {{ cliente.nombre }}</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="nueva_campaña_id">Seleccionar una nueva campaña:</label>
+                <select class="form-control" id="nueva_campaña_id" name="nueva_campaña_id">
+                    {% for campaign in campañas %}
+                    <option value="{{ campaign.campaign_id }}">{{ campaign.campaign_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="submit" class="btn btn-primary" value="Guardar Cambios">
+        </form>
+    </div>
+</body>
+</html>

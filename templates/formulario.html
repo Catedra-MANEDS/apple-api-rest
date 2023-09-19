@@ -12,7 +12,17 @@
     <div class="background-image"></div>
     <div class="contenedor-formulario">
         <!-- Título del formulario -->
-                <h2 class="mb-4 text-center">Registro nuevo cliente</h2>
+                <h2 class="mb-4 text-center">Registro de un nuevo cliente</h2>
+                <!-- Mostrar mensajes de error -->
+                <script>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                alert("{{ message }}");
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </script>
                 <!-- Formulario -->
                 <form method="POST" action="/nuevo_cliente">
                     <div class="form-group">
@@ -71,5 +81,9 @@
                     <button type="submit" class="btn btn-primary">Enviar</button>
                 </form>
     </div>
+    <!-- Enlace a Bootstrap JS y Popper.js (necesario para ciertas funcionalidades de Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Menú principal</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: rgb(153, 0, 0);
+        }
+        .background-image {
+            background-image: url('../static/pepephone_señala_fondo_rojo.jpg');
+            background-size: 20%;
+            background-position: 100px 50px;
+            background-repeat: no-repeat;
+            background-color: rgb(153, 0, 0);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-image"></div>
+    <div class="container mt-5">
+        <h1 class="text-white text-center">Menú principal</h1>
+        <div class="mt-4 text-center">
+            <form action="/nuevo_cliente" method="GET" class="d-inline">
+                <button type="submit" class="btn btn-primary mr-2">Registrar un nuevo cliente</button>
+            </form>
+            <form action="/mostrar_campaña" method="GET" class="d-inline">
+                <button type="submit" class="btn btn-primary mr-2">Mostrar Campañas</button>
+            </form>
+            <form action="/mostrar_clientes" method="GET" class="d-inline">
+                <button type="submit" class="btn btn-primary">Mostrar Clientes</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

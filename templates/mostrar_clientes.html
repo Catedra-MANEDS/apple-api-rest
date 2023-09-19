@@ -34,19 +34,18 @@
                     <td>{{ cliente.fecha_fin_contrato }}</td>
                     <td>{{ cliente.genero }}</td>
                     <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">{{ cliente.ruta_directorio_pass }}</td>
+                    <td>{{ cliente.campaign.campaign_id }}</td>
                     <td>{{ cliente.campaign.campaign_title }}</td>
-                <!--
                     <td>
-                        <form method="post" action="/modificar_suscripcion">
+                        <form method="get" action="/modificar_suscripcion/{{ cliente.id }}">
                             <input type="hidden" name="cliente_id" value="{{ cliente.id }}">
                             <button type="submit" class="btn btn-primary">Modificar Suscripcion</button>
                         </form>
                     </td>
-                -->
                     <td>
                         <form method="get" action="/modificar_pase/{{ cliente.id }}">
                             <input type="hidden" name="cliente_id" value="{{ cliente.id }}">
-                            <button type="submit" class="btn btn-primary">Modificar Pase</button>
+                            <button type="submit" class="btn btn-info">Modificar Pase</button>
                         </form>
 		            </td>
                 </tr>

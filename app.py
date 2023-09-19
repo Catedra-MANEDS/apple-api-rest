@@ -46,7 +46,7 @@ pass_generator_directory = os.path.join(app_directory, "..", "pass_generator")
 path_auto_new_pass_generator = os.path.join(pass_generator_directory, "auto_new_pass_generator.py")
 path_auto_new_pass_regenerator=os.path.join(pass_generator_directory, "auto_pass_regenerator.py")
 path_auto_new_pass_fields_regenerator=os.path.join(pass_generator_directory, "auto_new_pass_fields_regenerator.py")
-
+path_auto_delete_pass=os.path.join(pass_generator_directory, "./utils/auto_delete_pass.py")
 
 def new_request_print():
     print("\n-----------------------------------------")
@@ -78,45 +78,76 @@ def get_timestamp_actual():
     # Formatear el timestamp como cadena de texto en el formato 'YYYY-MM-DD HH:MM:SS'
     #timestamp_actual.strftime('%d-%m-%Y %H:%M:%S') --> formato no permitido en postgress db
     return timestamp_actual.strftime('%Y-%m-%d %H:%M:%S')
+    
+"""-------------------------------FUNCIONES AUX----------------------"""
+# Función para realizar la segmentación de campañas
+def segmentar_campañas(cliente):
+    campaign_rules = Campaign_rules.query.filter(
+        Campaign_rules.begin_date <= cliente.fecha_inicio_contrato,
+        Campaign_rules.end_date >= cliente.fecha_inicio_contrato,
+        Campaign_rules.age_start <= cliente.edad,
+        Campaign_rules.age_end >= cliente.edad,
+    ).all()
 
-"""----------------------------------ENDPOINTS----------------------------------------------"""
+    campaign_ids = [rule.campaign_id for rule in campaign_rules]
+    return campaign_ids
+
+def obtener_clientes_subscritos(campaign_id):
+    # Obtener clientes subscritos a la campaña
+    clientes_subscritos = Clientes.query.filter_by(campaign_id=campaign_id).all()
+
+    # Procesar los datos de los clientes
+    for cliente in clientes_subscritos:
+        ruta_directorio_pass = cliente.ruta_directorio_pass
+        # Obtener el campo message de la tabla campaign_notifications
+        campaign_notifications = Campaign_notifications.query.filter_by(campaign_id=campaign_id).first()
+        message = campaign_notifications.message
+
+        # Llamar a la función que procesa los datos del cliente
+        procesar_cliente(cliente, ruta_directorio_pass, message)
+
+
+"""----------------------------------ENDPOINTS de registro de clientes----------------------------------------------"""
 @app.route('/')
 def index():
     #return render_template('home.html')
-    return render_template('formulario.html')
+    return render_template('index.html')
 
-@app.route('/nuevo_cliente', methods=['POST'])
+@app.route('/nuevo_cliente', methods=['GET', 'POST'])
 def nuevo_cliente():
-    nombre = request.form['nombre']
-    edad = int(request.form['edad'])  # Convertir la edad a entero
-    correo = request.form['correo']
-    fecha_fin_contrato = datetime.strptime(request.form['fecha_fin_contrato'], '%Y-%m-%d')
-    fecha_inicio_contrato = datetime.strptime(request.form['fecha_inicio_contrato'], '%Y-%m-%d')
-    genero = request.form['genero']
-    
-    #Llamamos al script que generará el pase
-    result = subprocess.run(['python3', path_auto_new_pass_generator, nombre])
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        edad = int(request.form['edad'])  # Convertir la edad a entero
+        correo = request.form['correo']
+        fecha_fin_contrato = datetime.strptime(request.form['fecha_fin_contrato'], '%Y-%m-%d')
+        fecha_inicio_contrato = datetime.strptime(request.form['fecha_inicio_contrato'], '%Y-%m-%d')
+        genero = request.form['genero']
+        
+        #Llamamos al script que generará el pase
+        result = subprocess.run(['python3', path_auto_new_pass_generator, nombre])
 
-    # Si es 0 el proceso se completó con exito, se creo el nuevo pase del cliente 
-    if result.returncode == 0:
-        print("\nCreado el nuevo pase del cliente.")
-        ruta_directorio_pass=path_pass_generator+f"directorios_punto_pass/{nombre}.pass"
-    else:
-        print("\n\nError al crear el pase!\n")
-        ruta_directorio_pass=""
+        # Si es 0 el proceso se completó con exito, se creo el nuevo pase del cliente 
+        if result.returncode == 0:
+            print("\nCreado el nuevo pase del cliente.")
+            ruta_directorio_pass=path_pass_generator+f"directorios_punto_pass/{nombre}.pass"
+        else:
+            print("\n\nERROR al crear el pase, ya existe un cliente registrado con ese nombre!\n")
+            flash('Error al crear el pase, ya existe un cliente registrado con ese nombre!', 'error')
+            return render_template('formulario.html')
         # Creamos un objeto Cliente
-    nuevo_cliente = Clientes(nombre=nombre, edad=edad, correo=correo, fecha_fin_contrato=fecha_fin_contrato,
-                            genero=genero, fecha_inicio_contrato=fecha_inicio_contrato, ruta_directorio_pass=ruta_directorio_pass)
+        nuevo_cliente = Clientes(nombre=nombre, edad=edad, correo=correo, fecha_fin_contrato=fecha_fin_contrato,
+                                genero=genero, fecha_inicio_contrato=fecha_inicio_contrato, ruta_directorio_pass=ruta_directorio_pass)
 
-    campaign_ids_cumplidas = segmentar_campañas(nuevo_cliente)
-    campaign_id_cumplida = int(campaign_ids_cumplidas[0])
-    nuevo_cliente.campaign_id = int(campaign_id_cumplida)
+        campaign_ids_cumplidas = segmentar_campañas(nuevo_cliente)
+        campaign_id_cumplida = int(campaign_ids_cumplidas[0])
+        nuevo_cliente.campaign_id = int(campaign_id_cumplida)
+        
+        #Almacenamos objeto cliente en la base de datos
+        db.session.add(nuevo_cliente)
+        db.session.commit()
+        return render_template('index.html')
     
-    #Almacenamos objeto cliente en la base de datos
-    db.session.add(nuevo_cliente)
-    db.session.commit()
-
-    return render_template('datos_almacenados.html')
+    return render_template('formulario.html')
 
 """----------------------------------ENDPOINTS de CAMPAÑAS----------------------------------------"""
 # Ruta para mostrar las campañas y seleccionar una para modificar
@@ -237,6 +268,90 @@ def modificar_campaign_message(campaign_id):
 
     return render_template('modificar_campaign_message.html', campaign=campaign)
 
+@app.route('/eliminar_campaña/<int:campaign_id>', methods=['POST'])
+def eliminar_campaña(campaign_id):
+    # Obtener la campaña a eliminar desde la base de datos
+    campaign = Campaigns.query.get(campaign_id)
+    
+    if campaign:
+        # Eliminar la campaña de la base de datos
+        db.session.delete(campaign)
+        db.session.commit()
+        
+        # Redirigir a la página de mostrar campañas después de la eliminación
+        return redirect('/mostrar_campaña')
+    else:
+        # Manejar error si la campaña no existe
+        return "La campaña no existe o ya ha sido eliminada."
+        
+#----------------ENDPOINTS PARA CREAR UNA NUEVA CAMPAÑA, sus reglas y sus mensajes----------
+@app.route('/nueva_campaña', methods=['GET', 'POST'])
+def nueva_campaña():
+    if request.method == 'POST':
+        # Obtener los datos del formulario para la nueva campaña
+        campaign_title = request.form['campaign_title']
+        begin_date = datetime.strptime(request.form['begin_date'], '%Y-%m-%d')
+        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d')
+        status = True if request.form['status'] == 'True' else False
+
+        # Crear una nueva instancia de Campaigns con los datos ingresados
+        nueva_campaña = Campaigns(campaign_title=campaign_title, begin_date=begin_date, end_date=end_date, status=status)
+        # Agregar la nueva campaña a la base de datos
+        db.session.add(nueva_campaña)
+        db.session.commit()
+
+        # Redirigir a la página para introducir los datos de las nuevas reglas
+        return redirect(f'/nuevas_reglas_campaña/{nueva_campaña.campaign_id}')
+
+    return render_template('nueva_campaña.html')
+
+@app.route('/nuevas_reglas_campaña/<int:campaign_id>', methods=['GET', 'POST'])
+def nuevas_reglas_campaña(campaign_id):
+    campaign = Campaigns.query.get(campaign_id)
+    if request.method == 'POST':
+        # Obtener los datos ingresados en el formulario
+        age_start = request.form['age_start']
+        age_end = request.form['age_end']
+        gender = request.form['gender']
+        begin_date = request.form['begin_date']
+        end_date = request.form['end_date']
+
+        # Crear una nueva instancia de Campaign_rules con los datos ingresados
+        nuevas_reglas = Campaign_rules(campaign_id=campaign_id, age_start=age_start, age_end=age_end,
+                                       gender=gender, begin_date=begin_date, end_date=end_date)
+
+        # Agregar las nuevas reglas a la base de datos
+        db.session.add(nuevas_reglas)
+        db.session.commit()
+
+        # Redirigir a la página de mostrar campañas
+        return redirect(f'/nueva_notificacion_de_campaña/{campaign.campaign_id}')
+
+    return render_template('nuevas_reglas_campaña.html', campaign=campaign)
+
+# ... (otras rutas y configuraciones de la aplicación)
+
+@app.route('/nueva_notificacion_de_campaña/<int:campaign_id>', methods=['GET', 'POST'])
+def nueva_notificacion_de_campaña(campaign_id):
+    campaign = Campaigns.query.get(campaign_id)
+    if request.method == 'POST':
+        # Obtener los datos ingresados en el formulario
+        message = request.form['message']
+        pass_field_to_update = request.form['pass_field_to_update']
+
+        # Crear una nueva instancia de Campaign_notifications con los datos ingresados
+        nueva_notificacion = Campaign_notifications(campaign_id=campaign_id, message=message, pass_field_to_update=pass_field_to_update)
+
+        # Agregar la nueva notificación a la base de datos
+        db.session.add(nueva_notificacion)
+        db.session.commit()
+
+        # Redirigir a la página de mostrar campañas
+        return redirect(url_for('mostrar_campaña'))
+
+    return render_template('nuevas_notificacion_campaña.html', campaign=campaign, campaign_id=campaign_id)
+
+#--------------------------------END POINTS PARA MOSTRAR CLIENTES Y MODIFICAR SUS CAMPOS O SUSCRIPCIONES-----------
 @app.route('/mostrar_clientes')
 def mostrar_clientes():
     # Obtener todos los datos de la tabla Clientes
@@ -267,121 +382,25 @@ def modificar_pase(cliente_id):
     
     return render_template('modifcar_pase_del_cliente.html',cliente=cliente)
 
-@app.route('/nueva_campaña', methods=['GET', 'POST'])
-def nueva_campaña():
+@app.route('/modificar_suscripcion/<int:cliente_id>', methods=['GET', 'POST'])
+def modificar_suscripcion(cliente_id):
+    cliente = Clientes.query.get(cliente_id)
+
     if request.method == 'POST':
-        # Obtener los datos del formulario para la nueva campaña
-        campaign_title = request.form['campaign_title']
-        begin_date = request.form['begin_date']
-        end_date = request.form['end_date']
+        # Obtener la campaña seleccionada desde el formulario
+        nueva_campaña_id = request.form['nueva_campaña_id']
 
-        # Crear una nueva instancia de Campaigns con los datos ingresados
-        nueva_campaña = Campaigns(campaign_title=campaign_title, begin_date=begin_date, end_date=end_date)
-
-        # Agregar la nueva campaña a la base de datos
-        db.session.add(nueva_campaña)
+        # Actualizar la campaña del cliente en la base de datos
+        cliente.campaign_id = nueva_campaña_id
         db.session.commit()
 
-        # Redirigir a la página para introducir los datos de las nuevas reglas
-        return redirect(f'/nuevas_reglas_campaña/{nueva_campaña.campaign_id}')
+        # Redirigir a la página de mostrar clientes después de la actualización
+        return redirect('/mostrar_clientes')
 
-    return render_template('nueva_campaña.html')
+    # Obtener todas las campañas disponibles
+    campañas = Campaigns.query.all()
+    return render_template('seleccionar_suscripcion.html', cliente=cliente, campañas=campañas)
 
-@app.route('/eliminar_campaña/<int:campaign_id>', methods=['POST'])
-def eliminar_campaña(campaign_id):
-    # Obtener la campaña a eliminar desde la base de datos
-    campaign = Campaigns.query.get(campaign_id)
-    
-    if campaign:
-        # Eliminar la campaña de la base de datos
-        db.session.delete(campaign)
-        db.session.commit()
-        
-        # Redirigir a la página de mostrar campañas después de la eliminación
-        return redirect('/mostrar_campaña')
-    else:
-        # Manejar error si la campaña no existe
-        return "La campaña no existe o ya ha sido eliminada."
-
-@app.route('/nuevas_reglas_campaña/<int:campaign_id>', methods=['GET', 'POST'])
-def nuevas_reglas_campaña(campaign_id):
-    campaign = Campaigns.query.get(campaign_id)
-    if request.method == 'POST':
-        # Obtener los datos ingresados en el formulario
-        age_start = request.form['age_start']
-        age_end = request.form['age_end']
-        gender = request.form['gender']
-        begin_date = request.form['begin_date']
-        end_date = request.form['end_date']
-
-        # Crear una nueva instancia de Campaign_rules con los datos ingresados
-        nuevas_reglas = Campaign_rules(campaign_id=campaign_id, age_start=age_start, age_end=age_end,
-                                       gender=gender, begin_date=begin_date, end_date=end_date)
-
-        # Agregar las nuevas reglas a la base de datos
-        db.session.add(nuevas_reglas)
-        db.session.commit()
-
-        # Redirigir a la página de mostrar campañas
-        return redirect('/mostrar_campaña')
-
-    return render_template('nuevas_reglas_campaña.html', campaign=campaign)
-
-# ... (otras rutas y configuraciones de la aplicación)
-
-@app.route('/nueva_notificacion_de_campaña/<int:campaign_id>', methods=['GET', 'POST'])
-def nueva_notificacion_de_campaña(campaign_id):
-    campaign = Campaigns.query.get(campaign_id)
-    if request.method == 'POST':
-        # Obtener los datos ingresados en el formulario
-        message = request.form['message']
-        pass_field_to_update = request.form['pass_field_to_update']
-
-        # Crear una nueva instancia de Campaign_notifications con los datos ingresados
-        nueva_notificacion = Campaign_notifications(campaign_id=campaign_id, message=message, pass_field_to_update=pass_field_to_update)
-
-        # Agregar la nueva notificación a la base de datos
-        db.session.add(nueva_notificacion)
-        db.session.commit()
-
-        # Redirigir a la página de mostrar campañas
-        return redirect(url_for('mostrar_campaña'))
-
-    return render_template('nuevar_notificacion_campaña.html', campaign=campaign, campaign_id=campaign_id)
-
-
-
-"""-------------------------------FUNCIONES AUX----------------------"""
-# Función para realizar la segmentación de campañas
-def segmentar_campañas(cliente):
-    campaign_rules = Campaign_rules.query.filter(
-        Campaign_rules.begin_date <= cliente.fecha_inicio_contrato,
-        Campaign_rules.end_date >= cliente.fecha_inicio_contrato,
-        Campaign_rules.age_start <= cliente.edad,
-        Campaign_rules.age_end >= cliente.edad,
-    ).all()
-
-    campaign_ids = [rule.campaign_id for rule in campaign_rules]
-    return campaign_ids
-
-def obtener_clientes_subscritos(campaign_id):
-    # Obtener clientes subscritos a la campaña
-    clientes_subscritos = Clientes.query.filter_by(campaign_id=campaign_id).all()
-
-    # Procesar los datos de los clientes
-    for cliente in clientes_subscritos:
-        ruta_directorio_pass = cliente.ruta_directorio_pass
-        # Obtener el campo message de la tabla campaign_notifications
-        campaign_notifications = Campaign_notifications.query.filter_by(campaign_id=campaign_id).first()
-        message = campaign_notifications.message
-
-        # Llamar a la función que procesa los datos del cliente
-        procesar_cliente(cliente, ruta_directorio_pass, message)
-
-def procesar_cliente(cliente, ruta_directorio_pass, message):
-    # Implementar la lógica para procesar los datos del cliente y la ruta del directorio pass
-    # ...
-    return
 
 """---------------------------------------------ENDPOINTS para tablas de campañas---------------------------------------------"""
 # Ruta para el formulario de selección de tabla
@@ -471,13 +490,8 @@ def insertar_campaign_rules():
 def register_device(deviceLibraryIdentifier, passTypeIdentifier, serialNumber):
 
     new_request_print()
-
     check_authorization(request)
-        
-    # else:
-    #     print("\nAuthentication failed.")
-    #     return Response(status=401, mimetype='application/json')
-    
+       
     #Payload= body --> push token para mandar notificaciones al pase
     if request.method == 'POST':
         payload = request.json
@@ -545,6 +559,17 @@ def register_device(deviceLibraryIdentifier, passTypeIdentifier, serialNumber):
                 raise FileNotFoundError("El archivo no existe.")
             nombre_cliente = os.path.splitext(pass_to_delete.pkpass_name)[0]
             cliente_to_delete = Clientes.query.filter_by(nombre=nombre_cliente).one()
+            pass_route_to_delete=  cliente_to_delete.ruta_directorio_pass
+            if pass_route_to_delete != "":
+                result = subprocess.run(['python3', path_auto_delete_pass, pass_route_to_delete])
+
+                # Si es 0 el proceso se completó con exito, se creo el nuevo pase del cliente 
+                if result.returncode == 0:
+                    print("\nPase eliminado con éxito\n")
+                else:
+                    print("\nError al eliminar el pase!\n")
+            else:
+                print("El pase que está tratando de eliminar no existe!!!")
             try:
                 db.session.delete(pass_to_delete)
                 db.session.delete(cliente_to_delete)
@@ -602,13 +627,6 @@ def get_serial_number_updated(deviceLibraryIdentifier, passTypeIdentifier):
 # GET request ---> webServiceURL/version/devices/deviceLibraryIdentifier/registrations/passTypeIdentifier?passesUpdatedSince=tag
 @app.route('/v1/devices/<deviceLibraryIdentifier>/registrations/<passTypeIdentifier>?passesUpdatedSince=<previousLastUpdated>', methods=['GET'])
 def get_serial_number_with_update(deviceLibraryIdentifier, passTypeIdentifier,previousLastUpdated):
-
-    """En esta request cliente, ha recibido notif PUSH y quiere saber serialNumbers de los pases 
-    que han sido actualizados. En la request indica un timestamp con el que comparar
-    
-    Si el timestamp que manda es menos reciente que el almacenado en bd, le indicamos el timestamp nuevo y
-    los serialNumbers de los pases que tienen el timestamp desactualizado. Por eso en el if comparo el
-    timestamp sacado de la bd y el de la tag en la request recibida"""
 
     passes_updated_since = request.args.get('passesUpdatedSince')
     cabeceras=request.headers
@@ -705,59 +723,22 @@ def get_pushtoken(devicelibraryidentifier_dado):
     return pushtoken
 
 
-def load_x509_certificate(path_to_certificate):
-    with open(path_to_certificate, 'rb') as cert_file:
-        cert_data = cert_file.read()
-
-    return x509.load_pem_x509_certificate(cert_data, default_backend())
-
-def load_x509_certificate_and_private_key(cert_path, passphrase):
-    with open(cert_path, 'rb') as cert_file:
-        cert_data = cert_file.read()
-
-    # Cargar el certificado X.509 con contraseña utilizando OpenSSL.crypto
-    cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-
-    # Cargar la clave privada con contraseña utilizando OpenSSL.crypto
-    with open(path_to_private_key, 'rb') as key_file:
-        key_data = key_file.read()
-        private_key = crypto.load_privatekey(crypto.FILETYPE_PEM, key_data, passphrase.encode())
-
-    return cert, private_key
-
 def send_empty_push_notification(push_token,path_to_certificate,path_to_private_key):
 
     thumbprint = "pepe"
     passphrase="pepe"
-    #server = "gateway.push.apple.com" 
-    #server = "gateway.push.apple.com" 
     server="gateway.push.apple.com"
     port = 2195     # Producción escucha en puerto 2195
 
     # Cargar el certificado y la clave privada con la passphrase
-    #certificate,private_key = load_pem_with_passphrase(path_to_certificate,path_to_private_key, passphrase)
-    # Crear un contexto SSL y establecer el certificado y clave privada
-
-    #cert=load_x509_certificate(path_to_certificate)
     cert, private_key = load_x509_certificate_and_private_key(path_to_certificate, passphrase)
 
 
     # Crear un contexto SSL hay dos formas
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    # Agregar el certificado al contexto SSL
-    #context.load_verify_locations(cadata=cert.public_bytes(encoding=serialization.Encoding.PEM))
     
-    # context.use_certificate(cert)
-    # context.use_privatekey(private_key)
-
-    context.load_cert_chain(certfile=path_to_certificate, keyfile=path_to_private_key)
-    #passphrase.encode()
-    #context.load_cert_chain(certfile=path_certificado_completo, password=passphrase)
     # Agregar el certificado al contexto SSL
-
-
+    context.load_cert_chain(certfile=path_to_certificate, keyfile=path_to_private_key)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         with context.wrap_socket(sock, server_hostname=server) as ssl_sock:
             try:
@@ -795,34 +776,6 @@ def build_push_notification(push_token):
     payload_length = len(payload).to_bytes(2, byteorder='big')
     return command + device_token + payload_length + payload
 
-# Aquí puedes definir tus métodos auxiliares como get_device_push_token_list() y GetAppleServerCert()
-
-
-"""Endpoint creado por mi, donde se recibira una solicitud una vez se modifique un pase"""
-@app.route('/<passTypeIdentifier>/<serialnumber>/modified', methods=['POST'])
-def pkpass_update(passTypeIdentifier,serialnumber):
-    try:
-        # Obtener los datos enviados en el cuerpo de la solicitud
-        datos = request.get_json()
-
-        # Obtener la cadena en cuestión
-        datos_ruta_pkpass = datos.get("ruta_al_pkpass")
-
-        # Aquí puedes procesar los datos_ruta_pkpass como desees
-        # Por ejemplo, imprimirlos en la consola
-        print("\nPKPASS ACTUALIZADO")
-        print("Pass ID:", passTypeIdentifier)
-        print("Serial Number:",serialnumber)
-        print("Ruta al pkpass:", datos_ruta_pkpass)
-
-        # Preparar la respuesta para el cliente
-        respuesta = {"mensaje": "Datos recibidos correctamente"}
-
-        return jsonify(respuesta), 200
-
-    except Exception as e:
-        # En caso de error, devolver un mensaje de error al cliente
-        return jsonify({"error": str(e)}), 400
     
 if __name__ == '__main__':
     print("----------------------")
