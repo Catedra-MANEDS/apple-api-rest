@@ -9,7 +9,7 @@ Se cuenta con un script principal (app.py), dos auxiliares (config.py y db_model
 
 - [app.py](#app.py)
 - [config.py](#config.py)
-- [db_model.py]](#db_model.py])
+- [db_model.py](#db_model.py)
 - [directorios_auxiliares](#directorios_auxiliares)
 
 ## app.py
