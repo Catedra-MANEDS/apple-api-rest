@@ -19,8 +19,6 @@ from db_model import db,Registrations, Apilog, Devices, Passes, Authentication, 
 
 
 app = Flask(__name__)
-#user=os.environ['DB_USERNAME'],
-#password=os.environ['DB_PASSWORD'])
 app.config['SECRET_KEY'] = 'thisissecret'
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 #app.config["SQLALCHEMY_ECHO"] = True
@@ -782,8 +780,6 @@ if __name__ == '__main__':
     print(" * Process PID", os.getpid())
     print("----------------------")
     with app.app_context():
-        #db.init_app(app)
         db.create_all() # <--- create db object.
-        #from db_model import Registrations, Apilog, Devices, Passes, Authentication
         
     app.run(debug=True, host='10.0.0.2', port=5000, ssl_context=('/etc/letsencrypt/live/pepephone.jumpingcrab.com/fullchain.pem','/etc/letsencrypt/live/pepephone.jumpingcrab.com/privkey.pem'))
